@@ -19,6 +19,7 @@ include_directories(include)
 
 # ノードのコンパイル対象にics_driver.cppを追加
 add_executable(kondo_ics_servo_driver_node
+  src/kondo_ics_servo_driver.cpp
   src/kondo_ics_servo_driver_node.cpp
   src/ics_driver.cpp
 )

@@ -1,4 +1,4 @@
-#include "kondo_ics_servo_driver/kondo_ics_servo_driver.hpp"
+#include "kondo_ics_servo_driver/ics_driver.hpp"
 
 #include <fcntl.h>
 #include <termios.h>
@@ -53,13 +53,6 @@ bool IcsDriver::openPort(const std::string &port, unsigned int baud)
     cfsetispeed(&options, speed);
     cfsetospeed(&options, speed);
 
-    // options.c_cflag |= (CLOCAL | CREAD); // ローカル接続、受信有効化
-    // options.c_cflag &= ~CSIZE;
-    // options.c_cflag |= CS8;                             // 8ビットデータ
-    // options.c_cflag &= ~PARENB;                         // パリティなし
-    // options.c_cflag &= ~CSTOPB;                         // 1ストップビット
-    // options.c_iflag &= ~(IXON | IXOFF | IXANY);         // ソフトウェアフロー制御OFF
-    //
     // 8bit, Even parity, 1 stop bit
     options.c_cflag = CS8 | CLOCAL | CREAD | PARENB;
     options.c_cflag &= ~PARODD;  // Even parity
@@ -71,11 +64,9 @@ bool IcsDriver::openPort(const std::string &port, unsigned int baud)
     options.c_iflag &= ~(IXON | IXOFF | IXANY); // No flow control
 
     // // Output flags
-    // options.c_oflag = 0;
     options.c_oflag &= ~OPOST; // raw output
 
     // // Local flags
-    // options.c_lflag = 0;
     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); // raw input
 
     // 読み出しタイムアウト設定（VTIME: 100ms単位, VMIN: 最低読み出しバイト数）
@@ -116,22 +107,6 @@ bool IcsDriver::synchronize(const std::vector<uint8_t> &tx, std::vector<uint8_t>
     rx.resize(rxLength);
     size_t totalRead = 0;
 
-    // 送信前にRTSをON
-    // if (ioctl(fd_, TIOCMGET, &flags) < 0)
-    // {
-    //     std::cerr << "Failed to get modem status";
-    //     return false;s
-    // }
-    // flags &= ~TIOCM_RTS;
-    // if (ioctl(fd_, TIOCMSET, &flags) < 0)
-    // {
-    //     std::cerr << "Failed to set RTS";
-    //     return false;
-    // }
-
-    // 送信前の短いウェイト
-    // usleep(10); // 10us
-
     // 送信
     ssize_t written = write(fd_, tx.data(), tx.size());
     if (written != static_cast<ssize_t>(tx.size()))
@@ -140,29 +115,7 @@ bool IcsDriver::synchronize(const std::vector<uint8_t> &tx, std::vector<uint8_t>
     }
     tcdrain(fd_);
 
-    // RTSをOFF
-    // flags |= TIOCM_RTS;
-    // if (ioctl(fd_, TIOCMSET, &flags) < 0)
-    // {
-    //     std::cerr << "Failed to clear RTS";
-    //     return false;
-    // }
-    // ioctl(fd_, TIOCMSET, &flags);
-
     // 指令コマンド分を受信バッファから読み出す（空読み出し）
-    // std::vector<uint8_t> dummy;
-    // dummy.resize(tx.size());
-    // int bytes_available;
-    // while (ioctl(fd_, FIONREAD, &bytes_available) >= (int)tx.size())
-    //     ;
-    // int dummy_read_n = (int)read(fd_, dummy.data(), tx.size());
-    // std::cout << "tx.size()=" << (int)tx.size() << std::endl;
-    // for (int i = 0; i < tx.size(); i++)
-    // {
-    //     std::cout << "dummy[]=" << (int)dummy[i] << std::endl;
-    // }
-    // std::cout << "dummy_read_n=" << dummy_read_n << std::endl;
-    //
     size_t total_read_dummy = 0;
     size_t tx_length = tx.size();
     std::vector<uint8_t> dummy;
@@ -180,11 +133,11 @@ bool IcsDriver::synchronize(const std::vector<uint8_t> &tx, std::vector<uint8_t>
             // return false;
         }
     }
-    std::cout << "tx.size()=" << (int)tx.size() << std::endl;
-    for (int i = 0; i < tx.size(); i++)
-    {
-        std::cout << "dummy[]=" << (int)dummy[i] << std::endl;
-    }
+    // std::cout << "tx.size()=" << (int)tx.size() << std::endl;
+    // for (int i = 0; i < tx.size(); i++)
+    // {
+    //     std::cout << "dummy[]=" << (int)dummy[i] << std::endl;
+    // }
 
     // 受信バッファ読み出し
     while (totalRead < rxLength)
@@ -196,7 +149,7 @@ bool IcsDriver::synchronize(const std::vector<uint8_t> &tx, std::vector<uint8_t>
         }
         else if (n < 0)
         {
-            std::cout << "read from buffer error" << std::endl;
+            // std::cout << "read from buffer error" << std::endl;
             return false;
         }
     }

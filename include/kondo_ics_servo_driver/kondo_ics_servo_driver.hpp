@@ -1,60 +1,53 @@
-#ifndef KONDO_ICS_SERVO_DRIVER_HPP_
-#define KONDO_ICS_SERVO_DRIVER_HPP_
-
-#include <cstdint>
+#include <chrono>
+#include <cmath>
+#include <memory>
 #include <string>
 #include <vector>
+#include <iostream>
 
-class IcsDriver
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/logging.hpp"
+
+// サービスヘッダ（自作srv）
+#include "kondo_ics_servo_driver/srv/set_position.hpp"
+#include "kondo_ics_servo_driver/srv/get_position.hpp"
+#include "kondo_ics_servo_driver/srv/set_id.hpp"
+#include "kondo_ics_servo_driver/srv/get_id.hpp"
+
+#include "kondo_ics_servo_driver/ics_driver.hpp"
+
+using namespace std::chrono_literals;
+
+// 角度変換定数
+constexpr double RAD_TO_POS_SCALE = 1697.67; // pos = 7500 + rad * 1697.67
+constexpr int NEUTRAL_POS = 7500;            // サーボの中立位置
+
+class KondoIcsServoDriverNode : public rclcpp::Node
 {
 public:
-    /**
-     * @brief コンストラクタ．指定したシリアルポートを開く．
-     * @param port シリアルポート（例: "/dev/ttyUSB0"）
-     * @param baud 通信速度（例: 115200）
-     */
-    IcsDriver(const std::string &port, unsigned int baud);
-    ~IcsDriver();
-
-    bool isOpen() const;
-
-    /**
-     * @brief シリアル通信でtxデータを送信し，rxLengthバイト受信する．
-     */
-    bool synchronize(const std::vector<uint8_t> &tx, std::vector<uint8_t> &rx, size_t rxLength);
-
-    /**
-     * @brief サーボ角度指令．ICSプロトコルsetPosに準ずる．
-     * @param id サーボID
-     * @param pos サーボ位置（整数値：7500がニュートラル）
-     * @return trueなら成功，falseなら失敗
-     */
-    bool setPositionCmd(uint8_t id, int pos);
-
-    /**
-     * @brief サーボ位置取得．ICSプロトコルgetPosに準ずる．
-     * @param id サーボID
-     * @return 取得したサーボ位置（整数値），失敗なら -1
-     */
-    int getPositionCmd(uint8_t id);
-
-    /**
-     * @brief サーボのID読み出し．ICSプロトコルgetIDに準ずる．
-     * @return サーボID，失敗なら -1
-     */
-    int getIdCmd();
-
-    /**
-     * @brief サーボのID書き込み．ICSプロトコルsetIDに準ずる．
-     * @param new_id 書き込みたいID
-     * @return trueなら成功，falseなら失敗
-     */
-    bool setIdCmd(uint8_t new_id);
+    KondoIcsServoDriverNode();
 
 private:
-    int fd_; // シリアルポートのファイルディスクリプタ
-    bool openPort(const std::string &port, unsigned int baud);
-    void closePort();
-};
+    // サービスコールバック
+    void setPositionCallback(
+        const std::shared_ptr<kondo_ics_servo_driver::srv::SetPosition::Request> request,
+        std::shared_ptr<kondo_ics_servo_driver::srv::SetPosition::Response> response);
 
-#endif // KONDO_ICS_SERVO_DRIVER_HPP_
+    void getPositionCallback(
+        const std::shared_ptr<kondo_ics_servo_driver::srv::GetPosition::Request> request,
+        std::shared_ptr<kondo_ics_servo_driver::srv::GetPosition::Response> response);
+
+    void setIdCallback(
+        const std::shared_ptr<kondo_ics_servo_driver::srv::SetID::Request> request,
+        std::shared_ptr<kondo_ics_servo_driver::srv::SetID::Response> response);
+
+    void getIdCallback(
+        const std::shared_ptr<kondo_ics_servo_driver::srv::GetID::Request> /*request*/,
+        std::shared_ptr<kondo_ics_servo_driver::srv::GetID::Response> response);
+
+    std::shared_ptr<IcsDriver> ics_driver_;
+    rclcpp::Service<kondo_ics_servo_driver::srv::SetPosition>::SharedPtr set_pos_service_;
+    rclcpp::Service<kondo_ics_servo_driver::srv::GetPosition>::SharedPtr get_pos_service_;
+    rclcpp::Service<kondo_ics_servo_driver::srv::SetID>::SharedPtr set_id_service_;
+    rclcpp::Service<kondo_ics_servo_driver::srv::GetID>::SharedPtr get_id_service_;
+};
