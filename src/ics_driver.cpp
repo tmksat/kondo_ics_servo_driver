@@ -40,6 +40,13 @@ bool IcsDriver::openPort(const std::string &port, unsigned int baud)
         return false;
     }
 
+    // 8bit, Even parity, 1 stop bit
+    options.c_cflag = CS8 | CLOCAL | CREAD | PARENB;
+    options.c_cflag &= ~PARODD;  // Even parity
+    options.c_cflag &= ~CSTOPB;  // 1 stop bit
+    options.c_cflag &= ~CRTSCTS; // No flow control
+
+    // baudrate
     speed_t speed;
     switch (baud)
     {
@@ -52,12 +59,6 @@ bool IcsDriver::openPort(const std::string &port, unsigned int baud)
     }
     cfsetispeed(&options, speed);
     cfsetospeed(&options, speed);
-
-    // 8bit, Even parity, 1 stop bit
-    options.c_cflag = CS8 | CLOCAL | CREAD | PARENB;
-    options.c_cflag &= ~PARODD;  // Even parity
-    options.c_cflag &= ~CSTOPB;  // 1 stop bit
-    options.c_cflag &= ~CRTSCTS; // No flow control
 
     // Input flags
     options.c_iflag = IGNPAR | INPCK;           // Enable parity check
