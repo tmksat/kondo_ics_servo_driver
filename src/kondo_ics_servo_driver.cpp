@@ -37,6 +37,11 @@ KondoIcsServoDriverNode::KondoIcsServoDriverNode()
         std::bind(&KondoIcsServoDriverNode::getIdCallback, this,
                   std::placeholders::_1, std::placeholders::_2));
 
+    free_ = create_service<kondo_ics_servo_driver::srv::Free>(
+        "free",
+        std::bind(&KondoIcsServoDriverNode::freeCallback, this,
+                  std::placeholders::_1, std::placeholders::_2));
+
     RCLCPP_INFO(get_logger(), "Kondo ICS Servo Driver Node has been started!");
 }
 
@@ -87,4 +92,13 @@ void KondoIcsServoDriverNode::getIdCallback(
     int id = ics_driver_->getIdCmd();
     response->servo_id = id;
     RCLCPP_INFO(get_logger(), "GetID: servo_id=%d", id);
+}
+
+void KondoIcsServoDriverNode::freeCallback(
+    const std::shared_ptr<kondo_ics_servo_driver::srv::Free::Request> request,
+    std::shared_ptr<kondo_ics_servo_driver::srv::Free::Response> response)
+{
+    RCLCPP_INFO(get_logger(), "Free: servo_id=%d", request->servo_id);
+    bool success = ics_driver_->freeCmd(static_cast<uint8_t>(request->servo_id));
+    response->success = success;
 }

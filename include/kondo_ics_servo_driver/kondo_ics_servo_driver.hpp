@@ -13,6 +13,7 @@
 #include "kondo_ics_servo_driver/srv/get_position.hpp"
 #include "kondo_ics_servo_driver/srv/set_id.hpp"
 #include "kondo_ics_servo_driver/srv/get_id.hpp"
+#include "kondo_ics_servo_driver/srv/free.hpp"
 
 #include "kondo_ics_servo_driver/ics_driver.hpp"
 
@@ -45,9 +46,14 @@ private:
         const std::shared_ptr<kondo_ics_servo_driver::srv::GetID::Request> /*request*/,
         std::shared_ptr<kondo_ics_servo_driver::srv::GetID::Response> response);
 
+    void freeCallback(
+        const std::shared_ptr<kondo_ics_servo_driver::srv::Free::Request> request,
+        std::shared_ptr<kondo_ics_servo_driver::srv::Free::Response> response);
+
     std::shared_ptr<IcsDriver> ics_driver_;
     rclcpp::Service<kondo_ics_servo_driver::srv::SetPosition>::SharedPtr set_pos_service_;
     rclcpp::Service<kondo_ics_servo_driver::srv::GetPosition>::SharedPtr get_pos_service_;
     rclcpp::Service<kondo_ics_servo_driver::srv::SetID>::SharedPtr set_id_service_;
     rclcpp::Service<kondo_ics_servo_driver::srv::GetID>::SharedPtr get_id_service_;
+    rclcpp::Service<kondo_ics_servo_driver::srv::Free>::SharedPtr free_;
 };

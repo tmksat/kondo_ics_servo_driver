@@ -12,6 +12,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/GetPosition.srv"
   "srv/SetID.srv"
   "srv/GetID.srv"
+  "srv/Free.srv"
   DEPENDENCIES builtin_interfaces
 )
 

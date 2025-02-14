@@ -62,3 +62,8 @@ __現在のサーボIDの取得（サーボ1台のみ接続してください）
 ```
 $ ros2 service call /get_id kondo_ics_servo_msgs/srv/GetId "{}"
 ```
+
+__サーボオフ（ID:1）__
+```
+$ ros2 service call /free kondo_ics_servo_driver/srv/Free "{servo_id: 1}"
+```

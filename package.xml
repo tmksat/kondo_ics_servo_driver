@@ -2,9 +2,9 @@
 <package format="3">
   <name>kondo_ics_servo_driver</name>
   <version>0.1.0</version>
-  <description>ROS2ドライバーノード：ICSプロトコル対応KONDOサーボの制御を行うノード</description>
-  <maintainer email="your-email@example.com">Your Name</maintainer>
-  <license>Apache-2.0</license>
+  <description>Kondo ICS Servo Driver for ROS2</description>
+  <maintainer email="tomoki.sato@amvito.com">Tomoki Sato</maintainer>
+  <license>MIT License</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>rclcpp</build_depend>

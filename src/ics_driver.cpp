@@ -134,11 +134,6 @@ bool IcsDriver::synchronize(const std::vector<uint8_t> &tx, std::vector<uint8_t>
             // return false;
         }
     }
-    // std::cout << "tx.size()=" << (int)tx.size() << std::endl;
-    // for (int i = 0; i < tx.size(); i++)
-    // {
-    //     std::cout << "dummy[]=" << (int)dummy[i] << std::endl;
-    // }
 
     // 受信バッファ読み出し
     while (totalRead < rxLength)
@@ -220,4 +215,23 @@ bool IcsDriver::setIdCmd(uint8_t new_id)
         return false;
     }
     return ((rx[0] & 0x1F) == new_id);
+}
+
+bool IcsDriver::freeCmd(uint8_t id)
+{
+    std::vector<uint8_t> tx(3);
+    int pos = 0; // サーボオフコマンド
+    tx[0] = 0x80 + id;
+    tx[1] = (pos >> 7) & 0x7F;
+    tx[2] = pos & 0x7F;
+
+    std::vector<uint8_t> rx;
+    bool res = synchronize(tx, rx, 3);
+    if (!res || rx.size() != 3)
+    {
+        return false;
+    }
+    // 受信データからpos値を構築
+    int rePos = ((rx[1] & 0x7F) << 7) | (rx[2] & 0x7F);
+    return (std::abs(rePos - pos) < 50);
 }

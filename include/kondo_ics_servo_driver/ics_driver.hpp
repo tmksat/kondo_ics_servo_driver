@@ -51,6 +51,13 @@ public:
      */
     bool setIdCmd(uint8_t new_id);
 
+    /**
+     * @brief サーボオフ．ICSプロトコルfreeに準ずる．
+     * @param id サーボID
+     * @return trueなら成功，falseなら失敗
+     */
+    bool freeCmd(uint8_t id);
+
 private:
     int fd_; // シリアルポートのファイルディスクリプタ
     bool openPort(const std::string &port, unsigned int baud);
