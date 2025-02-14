@@ -5,15 +5,21 @@ using namespace std::chrono_literals;
 KondoIcsServoDriverNode::KondoIcsServoDriverNode()
     : Node("kondo_ics_servo_driver_node")
 {
-    // シリアルポート初期化（ポート名/baud rateは適宜変更）
-    ics_driver_ = std::make_shared<IcsDriver>("/dev/ttyUSB0", 115200);
+    // パラメータの宣言
+    this->declare_parameter("port", "/dev/ttyUSB0");
+
+    // パラメータの取得
+    port_name_ = this->get_parameter("port").as_string();
+
+    // シリアルポート初期化
+    ics_driver_ = std::make_shared<IcsDriver>(port_name_, baudrate_);
     if (!ics_driver_->isOpen())
     {
-        RCLCPP_ERROR(get_logger(), "Failed to open serial port");
+        RCLCPP_ERROR(get_logger(), "Failed to open serial port(%s)", port_name_.c_str());
     }
     else
     {
-        RCLCPP_INFO(get_logger(), "Serial port opened");
+        RCLCPP_INFO(get_logger(), "Serial port opened(%s)", port_name_.c_str());
     }
 
     // 各サービスサーバの生成

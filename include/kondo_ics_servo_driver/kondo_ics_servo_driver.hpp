@@ -56,4 +56,7 @@ private:
     rclcpp::Service<kondo_ics_servo_driver::srv::SetID>::SharedPtr set_id_service_;
     rclcpp::Service<kondo_ics_servo_driver::srv::GetID>::SharedPtr get_id_service_;
     rclcpp::Service<kondo_ics_servo_driver::srv::Free>::SharedPtr free_;
+
+    std::string port_name_;
+    const int baudrate_ = 115200;
 };
