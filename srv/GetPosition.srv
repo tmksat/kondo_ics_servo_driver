@@ -1,0 +1,3 @@
+int32 servo_id
+---
+float64 angle    # [rad]（負の値の場合は取得失敗）
