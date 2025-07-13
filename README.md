@@ -1,120 +1,115 @@
 # kondo-ics-servo-driver
 
-## 概要
+## Overview
 
-このリポジトリは、KONDO製のICSプロトコルを使用するサーボモーターをROS2環境で制御するためのドライバです。ビルド手順や実行方法、各種サービスの呼び出し方法、パラメータについての詳細な説明が含まれています。
+This repository is a driver for controlling servo motors using KONDO's ICS protocol in a ROS2 environment. It includes detailed instructions for building, execution methods, service invocation procedures, and parameter descriptions.
 
-
-## 動作確認環境
+## Tested Environment
 
 - Ubuntu 22.04.1 arm64
 - ROS2 Humble
-- [KONDO KRS-5054HV ICS](https://kondo-robot.com/product/03180)を用いてテスト
-- 通信速度 115200[bps]
+- Tested with [KONDO KRS-5054HV ICS](https://kondo-robot.com/product/03180)
+- Communication speed: 115200 bps
 
+## Services
 
-## サービス
-
-このROSノードは以下のサービスを提供します：
+This ROS node provides the following services:
 
 1. `/set_position`
-    - **説明**: 指定したサーボモーターの角度を設定します。
-    - **リクエスト**: `kondo_ics_servo_msgs/srv/SetPosition`
-      - `servo_id` (int): サーボモーターのID
-      - `angle` (float): 設定する角度[rad]
-    - **レスポンス**: 
-      - `success` (bool): 角度設定が成功したかどうか
+    - **Description**: Sets the angle of the specified servo motor.
+    - **Request**: `kondo_ics_servo_msgs/srv/SetPosition`
+      - `servo_id` (int): Servo motor ID
+      - `angle` (float): Angle to set [rad]
+    - **Response**: 
+      - `success` (bool): Whether the angle setting was successful
 
 2. `/get_position`
-    - **説明**: 指定したサーボモーターの現在の角度を取得します。
-    - **リクエスト**: `kondo_ics_servo_msgs/srv/GetPosition`
-      - `servo_id` (int): サーボモーターのID
-    - **レスポンス**: 
-      - `angle` (float): 現在の角度[rad]
+    - **Description**: Gets the current angle of the specified servo motor.
+    - **Request**: `kondo_ics_servo_msgs/srv/GetPosition`
+      - `servo_id` (int): Servo motor ID
+    - **Response**: 
+      - `angle` (float): Current angle [rad]
 
 3. `/set_id`
-    - **説明**: サーボモーターのIDを設定します。
-    - **リクエスト**: `kondo_ics_servo_msgs/srv/SetId`
-      - `new_id` (int): 新しいサーボモーターのID
-    - **レスポンス**: 
-      - `success` (bool): ID設定が成功したかどうか
+    - **Description**: Sets the servo motor ID.
+    - **Request**: `kondo_ics_servo_msgs/srv/SetId`
+      - `new_id` (int): New servo motor ID
+    - **Response**: 
+      - `success` (bool): Whether the ID setting was successful
 
 4. `/get_id`
-    - **説明**: 接続されているサーボモーターのIDを取得します。
-    - **リクエスト**: `kondo_ics_servo_msgs/srv/GetId`
-      - リクエストは空のメッセージです。
-    - **レスポンス**: 
-      - `servo_id` (int): サーボモーターのID
+    - **Description**: Gets the ID of the connected servo motor.
+    - **Request**: `kondo_ics_servo_msgs/srv/GetId`
+      - Request is an empty message.
+    - **Response**: 
+      - `servo_id` (int): Servo motor ID
 
 5. `/free`
-    - **説明**: 指定したサーボモーターのトルクをオフにします。
-    - **リクエスト**: `kondo_ics_servo_driver/srv/Free`
-      - `servo_id` (int): サーボモーターのID
-    - **レスポンス**: 
-      - `success` (bool): トルクオフが成功したかどうか
+    - **Description**: Turns off the torque of the specified servo motor.
+    - **Request**: `kondo_ics_servo_driver/srv/Free`
+      - `servo_id` (int): Servo motor ID
+    - **Response**: 
+      - `success` (bool): Whether the torque off was successful
 
+## Parameters
 
-
-## パラメータ
-
-このROSノードに対して設定できるパラメータは以下の通りです：
+The following parameters can be configured for this ROS node:
 
 1. `port`
-    - **説明**: サーボモーターと通信するためのシリアルポートのデバイスファイルを指定します。
-    - **デフォルト値**: `/dev/ttyUSB0`
-    - **使用例**: `/dev/ttyUSB1`
+    - **Description**: Specifies the serial port device file for communicating with the servo motor.
+    - **Default value**: `/dev/ttyUSB0`
+    - **Example usage**: `/dev/ttyUSB1`
 
-これらのパラメータは、ノードの起動時に`--ros-args -p <parameter_name>:=<value>`の形式で指定することができます。
+These parameters can be specified when launching the node using the format `--ros-args -p <parameter_name>:=<value>`.
 
+## Build
 
-## ビルド
-
-1. ワークスペースに移動します。  
-2. パッケージのビルドをビルドします。
-3. 環境変数等の設定します。  
+1. Navigate to your workspace.
+2. Build the package.
+3. Set up environment variables.
 ```shell
 $ cd ~/ros2_ws
 $ colcon build --packages-select kondo_ics_servo_driver
 $ source install/setup.bash
 ```
 
-## 実行
+## Execution
 
-### ノードの起動
+### Launching the Node
 
-デフォルトのシリアルポート(/dev/ttyUSB0)を使用する場合
+Using the default serial port (/dev/ttyUSB0):
 ```shell
 $ ros2 run kondo_ics_servo_driver kondo_ics_servo_driver_node
 ```
 
-シリアルポートを指定する場合
+Specifying a serial port:
 ```shell
 $ ros2 run kondo_ics_servo_driver kondo_ics_servo_driver_node --ros-args -p port:=/dev/ttyUSB1
 ```
 
-### 各種サービスの呼び出し
+### Service Calls
 
-__サーボ角度の指令（ID:1のサーボを45度=0.785rad）__
+__Setting servo angle (ID:1 servo to 45 degrees = 0.785 rad)__
 ```shell
 $ ros2 service call /set_position kondo_ics_servo_msgs/srv/SetPosition "{serve_id: 1, angle: 0.785}"
 ```
 
-__現在角度の取得（ID:1のサーボ）__
+__Getting current angle (ID:1 servo)__
 ```shell
 $ ros2 service call /get_position kondo_ics_servo_msgs/srv/GetPosition "{serve_id: 1}"
 ```
 
-__サーボIDの設定（ID:2に設定）__
+__Setting servo ID (to ID:2)__
 ```shell
 $ ros2 service call /set_id kondo_ics_servo_msgs/srv/SetId "{new_id: 2}"
 ```
 
-__現在のサーボIDの取得（サーボ1台のみ接続してください）__
+__Getting current servo ID (please connect only one servo)__
 ```shell
 $ ros2 service call /get_id kondo_ics_servo_msgs/srv/GetId "{}"
 ```
 
-__サーボのトルクオフ（ID:1）__
+__Turning off servo torque (ID:1)__
 ```shell
 $ ros2 service call /free kondo_ics_servo_driver/srv/Free "{servo_id: 1}"
 ```
